@@ -1,0 +1,141 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Book App</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-4 mb-4">Books</h1>
+
+        <!-- Search form -->
+        <form action="/books" method="GET" class="mb-4">
+            <div class="row">
+                <div class="col-md-3">
+                    <input type="text" name="title" class="form-control" placeholder="Title">
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="author" class="form-control" placeholder="Author">
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="genre" class="form-control" placeholder="Genre">
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Sort form -->
+        <form action="/books" method="GET" class="mb-4">
+            <div class="row">
+                <div class="col-md-3">
+                    <select name="sort_by" class="form-control">
+                        <option value="title">Title</option>
+                        <option value="author">Author</option>
+                        <option value="publication_date">Publication Date</option>
+                        <option value="genre">Genre</option>
+                        <option value="isbn">ISBN</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="sort_order" class="form-control">
+                        <option value="asc">Ascending</option>
+                        <option value="desc">Descending</option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-primary">Sort</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Books list -->
+        <div class="row">
+            {% if books %}
+                {% for book in books %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ book.title }}</h5>
+                                <p class="card-text">Author: {{ book.author }}</p>
+                                <p class="card-text">Genre: {{ book.genre }}</p>
+                                <p class="card-text">ISBN: {{ book.isbn }}</p>
+                                <form action="/books/{{ book.id }}" method="POST">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                                <form action="/books/{{ book.id }}" method="POST" class="mt-2">
+                                    <input type="hidden" name="_method" value="PUT">
+                                    <label for="title">Title:</label>
+                                    <input type="text" name="title" id="title" value="{{ book.title }}" class="form-control" required>
+                                    <label for="author">Author:</label>
+                                    <input type="text" name="author" id="author" value="{{ book.author }}" class="form-control" required>
+                                    <label for="publication_date">Publication Date:</label>
+                                    <input type="date" name="publication_date" id="publication_date" value="{{ book.publication_date }}" class="form-control" required>
+                                    <label for="genre">Genre:</label>
+                                    <input type="text" name="genre" id="genre" value="{{ book.genre }}" class="form-control">
+                                    <label for="isbn">ISBN:</label>
+                                    <input type="text" name="isbn" id="isbn" value="{{ book.isbn }}" class="form-control" required>
+                                    <button type="submit" class="btn btn-primary mt-2">Update</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-md-12">
+                    <p>No books found.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if books_pagination and books_pagination.pages > 1 %}
+                    <li class="page-item {% if not books_pagination.has_prev %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('index', page=books_pagination.prev_num) }}">Previous</a>
+                    </li>
+                    {% for page_num in range(1, books_pagination.pages + 1) %}
+                        <li class="page-item {% if page_num == books_pagination.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('index', page=page_num) }}">{{ page_num }}</a>
+                        </li>
+                    {% endfor %}
+                    <li class="page-item {% if not books_pagination.has_next %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('index', page=books_pagination.next_num) }}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+
+        <!-- Add New Book form -->
+        <h2 class="mt-4">Add New Book</h2>
+        <form action="/books" method="POST">
+            <div class="form-group">
+                <label for="title">Title:</label>
+                <input type="text" name="title" id="title" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="author">Author:</label>
+                <input type="text" name="author" id="author" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="publication_date">Publication Date:</label>
+                <input type="date" name="publication_date" id="publication_date" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="genre">Genre:</label>
+                <input type="text" name="genre" id="genre" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="isbn">ISBN:</label>
+                <input type="text" name="isbn" id="isbn" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Book</button>
+        </form>
+    </div>
+</body>
+</html>
